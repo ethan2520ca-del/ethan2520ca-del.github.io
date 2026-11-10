@@ -16,7 +16,7 @@
 <style>
 /* Витрина веб-мастера. Палитра задаётся тремя переменными в :root – их меняет сборка (vitrina.mjs). */
 :root{
-  --accent:#8C6F5E; --ink:#2E2B28; --soft:#F6F2ED;
+  --accent:#526F9B; --ink:#2E2B28; --soft:#F4F6FA;
   --paper:#FFFFFF; --line:#E7E8EE; --ink-2:#5B5D68; --ink-3:#8E909A;
   --display:"Unbounded",system-ui,sans-serif; --body:"Golos Text",system-ui,sans-serif;
   --r:22px;
@@ -127,13 +127,13 @@ section.block{padding:72px 0;border-top:1px solid var(--line)}
 .steps p{margin:8px 0 0;color:var(--ink-2);font-size:15px}
 
 /* финал: превью сообщения, которое уйдёт владельцу витрины */
-.final{margin:24px 0 72px;border-radius:32px;background:var(--ink);color:#fff;padding:40px 22px;display:grid;gap:30px;align-items:center;overflow:hidden;position:relative}
+.final{margin:24px 0 72px;border-radius:32px;background:var(--soft);color:var(--ink);border:1px solid var(--line);padding:40px 22px;display:grid;gap:30px;align-items:center;overflow:hidden;position:relative}
 @media (min-width:860px){.final{grid-template-columns:1.1fr .9fr;padding:64px}}
 .final h2{font-size:clamp(28px,4vw,48px);line-height:1.04}
-.final p{color:rgba(255,255,255,.72);margin:16px 0 0;max-width:38ch}
+.final p{color:var(--ink-2);margin:16px 0 0;max-width:38ch}
 .final .cta{margin-top:28px}
-.final .btn-ghost{background:rgba(255,255,255,.1);color:#fff}
-.final .btn-ghost:hover{background:rgba(255,255,255,.18)}
+.final .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.final .btn-ghost:hover{background:#fff;border-color:var(--ink-3)}
 .chat{background:#fff;color:var(--ink);border-radius:24px;padding:18px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6);max-width:380px;justify-self:center;width:100%}
 .chat .who{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .chat .who img,.chat .who b{width:36px;height:36px;border-radius:50%;object-fit:cover}
@@ -190,7 +190,7 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
 
   <section class="final reveal" id="write">
     <div>
-      <div class="eyebrow" style="color:rgba(255,255,255,.6)">Написать</div>
+      <div class="eyebrow">Написать</div>
       <h2 id="finalTitle">Покажу демо вашего сайта</h2>
       <p>Нажмите на мессенджер – сообщение уже набрано, останется отправить. Отвечаю в течение дня.</p>
       <div class="cta" data-cta></div>
