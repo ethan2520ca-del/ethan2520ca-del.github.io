@@ -81,7 +81,10 @@ section.block{padding:72px 0;border-top:1px solid var(--line)}
 .block-head p{color:var(--ink-2);max-width:42ch;margin:0}
 
 /* работы */
-.case{display:grid;gap:28px;align-items:center;padding:36px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 8px}
+.chip{font:inherit;font-size:14px;line-height:1;padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+.chip:hover{border-color:var(--ink-2)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}.case{display:grid;gap:28px;align-items:center;padding:36px 0}
 .case + .case{border-top:1px dashed var(--line)}
 @media (min-width:900px){.case{grid-template-columns:auto 1fr;gap:56px}.case:nth-child(even){grid-template-columns:1fr auto}.case:nth-child(even) .devices{order:2}}
 .devices{position:relative;display:flex;align-items:end;justify-content:center;gap:0;padding:10px 0}
@@ -171,6 +174,7 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
 
   <section class="block" id="works">
     <div class="block-head reveal"><div><div class="eyebrow">Работы</div><h2>Сайты, которые я сделала</h2></div><p id="worksNote"></p></div>
+    <div class="chips" id="chips"></div>
     <div id="cases"></div>
   </section>
 
@@ -223,7 +227,10 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
 
   const cases = D.cases || [];
   const real = cases.filter((c) => c.kind === 'real').length;
-  const niches = [...new Set(cases.map((c) => c.niche).filter(Boolean))];
+  // ниши сравниваем без учёта регистра и лишних пробелов: «Парикмахерская» и «парикмахерская» — одна ниша
+  const norm = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const nicheKey = (c) => norm(c.niche);
+  const niches = [...new Set(cases.map((c) => nicheKey(c)).filter(Boolean))];
   const word = (n, a, b, c) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c; };
   $('facts').innerHTML = [
     cases.length ? `<span><b>${cases.length}</b>${word(cases.length, 'сайт', 'сайта', 'сайтов')} в работах</span>` : '',
@@ -265,7 +272,7 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
   else { fan.classList.add('empty'); fan.textContent = 'Здесь появятся ваши работы: скажите «добавь в витрину сайт …»'; }
 
   const story = (c) => [['Задача', c.task], ['Что сделал', c.did], ['Результат', c.result]].filter(([, v]) => v).map(([k, v]) => `<li><b>${k}</b><span>${esc(v)}</span></li>`).join('');
-  $('cases').innerHTML = cases.map((c, i) => `
+  const caseHtml = (c, i) => `
     <article class="case reveal">
       <div class="devices${c.desktop ? '' : ' solo'}">
         ${c.desktop ? `<div class="browser"><div class="bar"><i></i><i></i><i></i><span>${esc((c.url || '').replace(/^https?:\/\//, ''))}</span></div><img src="${esc(c.desktop)}" alt="Сайт ${esc(c.title)}" loading="lazy"></div>` : ''}
@@ -278,7 +285,31 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
         ${c.quote ? `<blockquote class="quote">«${esc(c.quote)}»<cite>${esc(c.quoteAuthor || 'владелец')}</cite></blockquote>` : ''}
         ${c.url ? `<a class="open" href="${esc(c.url)}" target="_blank" rel="noopener">Открыть сайт →</a>` : ''}
       </div>
-    </article>`).join('') || '<p style="color:var(--ink-3)">Работы появятся здесь.</p>';
+    </article>`;
+
+  const casesBox = $('cases');
+  const showCases = (list) => {
+    casesBox.innerHTML = list.map(caseHtml).join('') || '<p style="color:var(--ink-3)">Работы появятся здесь.</p>';
+  };
+  showCases(cases);
+
+  // переключатели по нишам: страница не растягивается на полотно
+  const chipsBox = $('chips');
+  if (chipsBox) {
+    const label = (key) => (cases.find((c) => nicheKey(c) === key) || {}).niche || key;
+    const chips = [{ key: '', text: `Все · ${cases.length}` }].concat(
+      niches.map((k) => ({ key: k, text: `${label(k)} · ${cases.filter((c) => nicheKey(c) === k).length}` }))
+    );
+    chipsBox.innerHTML = chips.length > 2
+      ? chips.map((ch, i) => `<button class="chip${i === 0 ? ' on' : ''}" data-niche="${esc(ch.key)}">${esc(ch.text)}</button>`).join('')
+      : '';
+    chipsBox.addEventListener('click', (e) => {
+      const btn = e.target.closest('.chip'); if (!btn) return;
+      chipsBox.querySelectorAll('.chip').forEach((b) => b.classList.toggle('on', b === btn));
+      const key = btn.dataset.niche;
+      showCases(key ? cases.filter((c) => nicheKey(c) === key) : cases);
+    });
+  }
 
   $('price').innerHTML = (D.services || []).map((s) => `<li><h3>${esc(s.title)}</h3><p>${esc(s.desc || '')}</p><span class="sum">${esc(s.price || 'по запросу')}</span></li>`).join('');
   $('steps').innerHTML = (D.steps || [
