@@ -272,6 +272,7 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
   else { fan.classList.add('empty'); fan.textContent = 'Здесь появятся ваши работы: скажите «добавь в витрину сайт …»'; }
 
   const story = (c) => [['Задача', c.task], ['Что сделал', c.did], ['Результат', c.result]].filter(([, v]) => v).map(([k, v]) => `<li><b>${k}</b><span>${esc(v)}</span></li>`).join('');
+  let io = null; // наблюдатель появления: создаётся ниже, нужен и при перерисовке списка
   const caseHtml = (c, i) => `
     <article class="case reveal">
       <div class="devices${c.desktop ? '' : ' solo'}">
@@ -290,6 +291,8 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
   const casesBox = $('cases');
   const showCases = (list) => {
     casesBox.innerHTML = list.map(caseHtml).join('') || '<p style="color:var(--ink-3)">Работы появятся здесь.</p>';
+    // после перерисовки новые карточки надо снова отдать наблюдателю, иначе останутся прозрачными
+    if (io) casesBox.querySelectorAll('.reveal').forEach((el) => io.observe(el));
   };
   showCases(cases);
 
@@ -322,7 +325,7 @@ footer{padding:26px 0 40px;color:var(--ink-3);font-size:14px;display:flex;flex-w
   // сдвиг прокрутки внутри телефона = высота скриншота минус экран
   const fit = (img) => { const s = img.parentElement; const h = img.getBoundingClientRect().height, sh = s.getBoundingClientRect().height; if (h > sh) img.style.setProperty('--shift', `${-((h - sh) / h) * 100}%`); };
   document.querySelectorAll('[data-shift]').forEach((img) => { if (img.complete) fit(img); else img.addEventListener('load', () => fit(img)); });
-  const io = new IntersectionObserver((es) => es.forEach((e) => {
+  io = new IntersectionObserver((es) => es.forEach((e) => {
     if (e.target.classList.contains('phone')) e.target.classList.toggle('live', e.isIntersecting);
     else if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
   }), { threshold: .15 });
